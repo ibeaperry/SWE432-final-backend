@@ -40,43 +40,116 @@ function fixProfanity(string) {
 //returns json of all form entries
 app.post("/writeReview", function (req, res) {
     filePath = __dirname + '/public/data.json';
-    var num = fixProfanity(req.body.number);
-    var date = fixProfanity(req.body.Date_of_Visit);
-    var comments = fixProfanity(req.body.Comments);
-    var rating = fixProfanity(req.body.rating);
-    var last_name = fixProfanity(req.body.last_name);
     var first_name = fixProfanity(req.body.first_name);
-    var email = fixProfanity(req.body.email);
-    var building = fixProfanity(req.body.building);
     newEntry = {
-        "number": num,
-        "date": date,
-        "comments": comments,
-        "rating": rating,
-        "last_name": last_name,
         "first_name": first_name,
-        "email": email,
-        "building": building
     };
-    fs.readFile(filePath, function (err, data) {
-        var json = JSON.parse(data);
-        json.entries.push(newEntry);
-        fs.writeFile(filePath, JSON.stringify(json), (error) => {
-            if (error) {
-                console.log('error', error);
-                next(error);
-            }
-            console.log('file saved');
-            res.sendFile(filePath);
-        });
-    });
-});
 
+    // fs.truncate('/public/data.txt', 0, function(){console.log('done')})
+    // fs.writeFile('/public/data.txt', '', function(){console.log('done')})
+
+    const splut = first_name.split(' ');
+    var conjoined = splut.join();
+    var maybe = first_name.replace('and ','')
+    var s;
+    for(s = 1; s < splut.length; s+= 2){
+        if(splut[s] != 'and' ||
+        splut[s] != 'AND' ||
+        splut[s] != 'or' ||
+        splut[s] != 'OR' ||
+        splut[s] != '&' ||
+        splut[s] != '&&' ||
+        splut[s] != '|' ||
+        splut[s] != 'xor' ||
+        splut[s] != 'XOR' ||
+        splut[s] != '||' ){
+            console.warn('invalid input');
+        }
+
+
+    }
+
+
+    maybe = maybe.replace('AND ','')
+    maybe = maybe.replace('& ','')
+    maybe = maybe.replace('&& ','')
+    maybe = maybe.replace('or ','')
+    maybe = maybe.replace('OR ','')
+    maybe = maybe.replace('| ','')
+    maybe = maybe.replace('|| ','')
+    maybe = maybe.replace('xor ','')
+    maybe = maybe.replace('XOR ','')
+    maybe = maybe.split(' ');
+    console.log(splut);
+    console.log(maybe);
+    var answer = tTable(maybe.length, 0, maybe,0,conjoined)
+    // fs.writeFile(filepath,'{ "full" : "' + first_name+'"}')
+    // var answer = tTable(splut.length,0,splut);
+    console.log(answer);
+    console.log(maybe.length);
+
+    // fs.truncate('filePath', 0, function(){console.log('done')})
+    // fs.readFile(filePath, function (err, data) {
+    //     var json = JSON.parse(data);
+    //     json.entries.push(newEntry);
+    //     fs.writeFile(filePath, JSON.stringify(json), (error) => {
+    //         if (error) {
+    //             console.log('error', error);
+    //             next(error);
+    //         }
+    //         console.log('file saved');
+    //         res.sendFile(filePath);
+    //     });
+    // });
+});
+function tTable(N, index, tVals,initial,start){
+    var i;
+    var ret = "";
+    console.log("start: " + start);
+    if(index == N){
+        for(i = 0; i < N; i++){
+            ret = ret + tVals[i] + " ";
+        }
+        console.log(ret);
+
+        fs.readFile(__dirname + '/public/data.txt', 'utf8', function(err,data){
+            console.log("stuff");
+            console.log(data);
+            console.log(ret);
+            var stuff = data + ret;
+            console.log(stuff);
+            fs.appendFile(__dirname + '/public/data.txt',stuff + "| " , (error) => {
+                if (error) {
+                    console.log('error', error);
+                    next(error);
+                }
+            });
+        })
+        return ret;
+    }else{
+        for(i =0; i < 2; i++){
+            tVals[index] = i;
+            tTable(N,index + 1, tVals,index + 1);
+        }
+    }
+}
 //returns all form entries
 app.post("/readReviews", function (req, res) {
-    filePath = __dirname + '/public/data.json';
-    console.log('file read');
-    res.sendFile(filePath);
+    // filePath = __dirname + '/public/data.txt';
+    // var filePath2 = __dirname + '/public/data.json';
+    fs.readFile(__dirname + '/public/data.txt', function(err,data){
+        var newEntrie = '{ "entries": "' +data+'"}'; 
+        console.log("newEntrie: " + newEntrie)
+        fs.writeFile(__dirname + '/public/data.json', newEntrie,(error) =>{
+            if(error){
+                console.log('error: ' , error);
+                res.sendFile(__dirname + '/public/data.json');
+            }else{
+                res.sendFile(__dirname + '/public/data.json');
+            }
+        })
+    });
+    res.sendFile(__dirname + '/public/data.json');
 });
 
 //clears all reviews
@@ -90,10 +163,17 @@ app.post("/clearReviews", function (req, res) {
         if (error) {
             console.log('error clearing files');
             next(error);
+        }else{
+
         }
         console.log('cleared entries');
         res.sendFile(filePath);
     });
+});
+app.post("/clearText", function (req, res) {
+    filePath = __dirname + '/public/data.txt';
+    console.log('file read');
+    fs.truncate(filePath, 0, function(){console.log('CLEARED TEXT')})
 });
 
 //starts up server on port
