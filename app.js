@@ -69,16 +69,17 @@ app.post("/writeReview", function (req, res) {
 
     }
 
-
-    maybe = maybe.replace('AND ','')
-    maybe = maybe.replace('& ','')
-    maybe = maybe.replace('&& ','')
-    maybe = maybe.replace('or ','')
-    maybe = maybe.replace('OR ','')
-    maybe = maybe.replace('| ','')
-    maybe = maybe.replace('|| ','')
-    maybe = maybe.replace('xor ','')
-    maybe = maybe.replace('XOR ','')
+    for(s = 0; s < splut.length; s++){
+        maybe = maybe.replace('AND ','')
+        maybe = maybe.replace('& ','')
+        maybe = maybe.replace('&& ','')
+        maybe = maybe.replace('or ','')
+        maybe = maybe.replace('OR ','')
+        maybe = maybe.replace('| ','')
+        maybe = maybe.replace('|| ','')
+        maybe = maybe.replace('xor ','')
+        maybe = maybe.replace('XOR ','')
+    }
     maybe = maybe.split(' ');
     console.log(splut);
     console.log(maybe);
@@ -87,7 +88,15 @@ app.post("/writeReview", function (req, res) {
     // var answer = tTable(splut.length,0,splut);
     console.log(answer);
     console.log(maybe.length);
-
+    fs.writeFile(filePath,splut.join(), (error) => {
+        if(error){
+            console.log('error', error);
+        }
+        else{
+            console.log("GOOD!");
+            console.log(splut.join());
+        }
+    })
     // fs.truncate('filePath', 0, function(){console.log('done')})
     // fs.readFile(filePath, function (err, data) {
     //     var json = JSON.parse(data);
@@ -105,31 +114,31 @@ app.post("/writeReview", function (req, res) {
 function tTable(N, index, tVals,initial,start){
     var i;
     var ret = "";
-    console.log("start: " + start);
+    console.log("starts: " + start);
     if(index == N){
         for(i = 0; i < N; i++){
             ret = ret + tVals[i] + " ";
         }
         console.log(ret);
 
-        fs.readFile(__dirname + '/public/data.txt', 'utf8', function(err,data){
-            console.log("stuff");
-            console.log(data);
-            console.log(ret);
-            var stuff = data + ret;
-            console.log(stuff);
-            fs.appendFile(__dirname + '/public/data.txt',stuff + "| " , (error) => {
+        // fs.readFile(__dirname + '/public/data.txt', 'utf8', function(err,data){
+        //     console.log("stuff");
+        //     console.log(data);
+        //     console.log(ret);
+        //     var stuff = data + ret;
+        //     console.log("stuff: "+ stuff);
+            fs.appendFile(__dirname + '/public/data.txt',ret + "|" +start+"| ", (error) => {
                 if (error) {
                     console.log('error', error);
                     next(error);
                 }
             });
-        })
+        // })
         return ret;
     }else{
         for(i =0; i < 2; i++){
             tVals[index] = i;
-            tTable(N,index + 1, tVals,index + 1);
+            tTable(N,index + 1, tVals,index + 1, start);
         }
     }
 }
