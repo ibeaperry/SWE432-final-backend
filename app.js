@@ -146,6 +146,7 @@ function tTable(N, index, tVals,initial,start){
 app.post("/readReviews", function (req, res) {
     // filePath = __dirname + '/public/data.txt';
     // var filePath2 = __dirname + '/public/data.json';
+    console.log("stuff going on?");
     fs.readFile(__dirname + '/public/data.txt', function(err,data){
         var newEntrie = '{ "entries": "' +data+'"}'; 
         console.log("newEntrie: " + newEntrie)
